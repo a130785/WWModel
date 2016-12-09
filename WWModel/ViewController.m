@@ -9,6 +9,7 @@
 #import "ViewController.h"
 #import "NSObject+WWModel.h"
 #import "Department.h"
+#import <objc/runtime.h>
 #import "Employee.h"
 
 @interface ViewController ()
@@ -20,9 +21,33 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-//    [self simpleness_jsonToModle];
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
     
-    [self complex_dicToObject];
+        SEL simpleness_Sel = @selector(simpleness_jsonToModle);
+        SEL complex_Sel = @selector(complex_dicToObject);
+        //两个方法的Method
+        Method simpleMethod = class_getInstanceMethod([self class], simpleness_Sel);
+        Method complexMethod = class_getInstanceMethod([self class], complex_Sel);
+        
+        //首先动态添加方法，实现是被交换的方法，返回值表示添加成功还是失败
+        BOOL isAdd = class_addMethod([self class], simpleness_Sel, method_getImplementation(complexMethod), method_getTypeEncoding(complexMethod));
+        if (isAdd) {
+            //如果成功，说明类中不存在这个方法的实现
+            //将被交换方法的实现替换到这个并不存在的实现
+            class_replaceMethod([self class], simpleness_Sel, method_getImplementation(simpleMethod), method_getTypeEncoding(simpleMethod));
+        }else{
+            //否则，交换两个方法的实现
+            method_exchangeImplementations(simpleMethod, complexMethod);
+        }
+        
+    });
+    
+    
+    //方法交换后 这里实际调的是complex_dicToObject 的实现
+    [self simpleness_jsonToModle];
+    
+//    [self complex_dicToObject];
 }
 
 
@@ -41,6 +66,7 @@
     NSLog(@"%@",el.name);
 }
 
+//优化后的转换
 - (void)complex_dicToObject{
     
     NSDictionary *dic = @{
