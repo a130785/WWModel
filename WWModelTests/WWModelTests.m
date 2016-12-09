@@ -7,6 +7,9 @@
 //
 
 #import <XCTest/XCTest.h>
+#import "Department.h"
+#import "Employee.h"
+#import "NSObject+WWModel.h"
 
 @interface WWModelTests : XCTestCase
 
@@ -27,6 +30,33 @@
 - (void)testExample {
     // This is an example of a functional test case.
     // Use XCTAssert and related functions to verify your tests produce the correct results.
+    NSDictionary *dic = @{
+                          @"employeeId" : @1,
+                          @"name" : @"Emp1",
+                          @"dateOfBirth" : [NSDate date],
+                          @"department" : @{
+                                  @"departmentId" : @1,
+                                  @"intProperty" : @(-1),
+                                  @"unsignedProperty" : @22,
+                                  @"shortProperty" : @(-333),
+                                  @"longProperty" : @(-4444),
+                                  @"unsignedLongProperty" : @55555,
+                                  @"longLongProperty" : @(-666666),
+                                  @"unsignedLongLongProperty" : @7777777,
+                                  @"boolProperty" : @(true),
+                                  @"floatProperty" : @1.1,
+                                  @"doubleProperty" : @(-1.1),
+                                  @"charProperty" : @('a'),
+                                  @"BOOLProperty" : @NO,
+                                  @"stringProperty" : @"abc",
+                                  @"mutableStringProperty" : @"def",
+                                  @"arrayProperty" : @[ @1, @2, @3 ]
+                                  }
+                          };
+    Employee *el = [Employee ww_objectWithDictionary:dic];
+    Department *dp = el.department;
+    XCTAssert(dp,@"关联失败");
+    NSLog(@"%@ , dpID = %ld",el.name , (long)dp.departmentId);
 }
 
 - (void)testPerformanceExample {
